@@ -14,7 +14,6 @@ export const calculateTotalCost = (trip: Trip): number => {
     (sum: number, activity: Activity) => sum + activity.cost,
     0
   );
-  const totalCost = calculateTotalCost(trip);
 };
 
 // Function that receive a trip, one value limit (treshold), and return of an array of Activity.

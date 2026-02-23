@@ -11,4 +11,9 @@ export type Trip = {
   destination: string;
   startDate: Date;
   activities: Activity[];
+  currency: string;
+  flag: string;
 };
+
+export const trips: Trip[] = []
+
