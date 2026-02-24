@@ -1,12 +1,10 @@
-import { Trip, Activity } from "../models";
+import { Trip, Activity} from '../models'
 
 export class ItineraryEngine {
   private trips: Trip[] = [];
 
-  createTrip(destination: string, startDate: string): Trip {
-    const newTrip: Trip = { destination, startDate, activities: [] };
-    this.trips.push(newTrip);
-    return newTrip;
+  addTrip(trip: Trip){
+    this.trips.push(trip)
   }
 
   addActivity(trip: Trip, activity: Activity): void {
@@ -14,15 +12,13 @@ export class ItineraryEngine {
   }
 
   getActivitiesByDay(trip: Trip, date: string): Activity[] {
-    return trip.activities.filter(a => a.date === date);
+    return trip.activities.filter(a => a.startTime.toISOString().startsWith(date));
   }
 
   getActivitiesSorted(trip: Trip): Activity[] {
-    return [...trip.activities].sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.time}`);
-      const dateB = new Date(`${b.date}T${b.time}`);
-      return dateA.getTime() - dateB.getTime();
-    });
+    return [...trip.activities].sort((a, b) =>  
+      a.startTime.getTime() - b.startTime.getTime()
+    );
   }
 
   filterActivitiesByCategory(trip: Trip, category: Activity["category"]): Activity[] {

@@ -1,9 +1,10 @@
 import * as readline from "readline";
-import { ItineraryEngine } from './services/itineraryService';
 import type { Activity, Trip } from './models';
+import {createTrip} from './services/destinationService'
+import {engine} from './services/destinationService'
+import {v4 as uuidv4} from 'uuid'
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-const engine = new ItineraryEngine();
 let currentTrip: Trip | null = null;
 
 function ask(question: string): Promise<string> {
@@ -13,60 +14,65 @@ function ask(question: string): Promise<string> {
 
 async function mainMenu() {
   console.log('\nTrip Planner Menu ===');
-  console.log('1. Add Activity');
-  console.log('2. View Activities by Day');
-  console.log('3. View Sorted Activities');
-  console.log('4. Filter Activities by Category');
-  console.log('5. Exit');
+  console.log('1. Create trip');
+  console.log('2. Add Activity');
+  console.log('3. View Activities by Day');
+  console.log('4. View Sorted Activities');
+  console.log('5. Filter Activities by Category');
+  console.log('6. Show All Trips');
+  console.log('7. Exit');
 
   while (true) {
     const choice = (await ask('\nChoose an option:')).trim();
 
     switch (choice) {
       case '1':
-        await addActivityCLI();
+        await createTripCLI();
         break;
       case '2':
-        await viewByDayCLI();
+        await addActivityCLI();
         break;
       case '3':
-        await viewSortedCLI();
+        await viewByDayCLI();
         break;
       case '4':
-        await filterByCategoryCLI();
+        await viewSortedCLI();
         break;
       case '5':
+        await filterByCategoryCLI();
+        break;
+      case '6':
+        console.log("Trips", JSON.stringify(engine.getTrips(), null, 2))
+        break;
+      case '7':
         console.log('Goodbye!');
         rl.close();
         return;
       default:
-        console.log('Invalid choice. Enter a number 1–5.');
+        console.log('Invalid choice. Enter a number 1–7.');
     }
 
     // re-print menu after each action
     console.log('\nTrip Planner Menu ===');
-    console.log('1. Add Activity');
-    console.log('2. View Activities by Day');
-    console.log('3. View Sorted Activities');
-    console.log('4. Filter Activities by Category');
-    console.log('5. Exit');
+    console.log('1. Create trip');
+    console.log('2. Add Activity');
+    console.log('3. View Activities by Day');
+    console.log('4. View Sorted Activities');
+    console.log('5. Filter Activities by Category');    
+    console.log('6. All trips');
+    console.log('7. Exit');
   }
 }
 
-async function createTripCLI() {
-  const destination = await ask('Destination:');
-  const startDate = await ask('Start Date (YYYY-MM-DD):');
-  currentTrip = engine.createTrip(destination.trim(), startDate.trim());
-  console.log('Trip created successfully!');
+async function createTripCLI(){
+  const destination = await ask("Destination: ")
+  currentTrip = await createTrip(destination.trim())
+  console.log('Trip created succesfully')
 }
-
 async function addActivityCLI() {
   if (!currentTrip) {
     console.log('No trip found. Let\'s create one now.');
-    const destination = await ask('Destination:');
-    const startDate = await ask('Start Date (YYYY-MM-DD):');
-    currentTrip = engine.createTrip(destination.trim(), startDate.trim());
-    console.log('Trip created successfully!');
+    createTripCLI()
   }
 
   const name = await ask('Activity Name:');
@@ -80,9 +86,18 @@ async function addActivityCLI() {
   const time = await ask('Time (HH:MM):');
   const date = await ask('Date (YYYY-MM-DD):');
 
-  engine.addActivity(currentTrip, { name: name.trim(), cost, category, time: time.trim(), date: date.trim() });
-  console.log('Activity added!');
-}
+  const startTime = new Date (`${date.trim()}T${time.trim()}`)
+  
+  const activity: Activity = {
+    id: uuidv4(), 
+    name: name.trim(), 
+    cost, 
+    category, 
+    startTime,
+  } 
+  engine.addActivity(currentTrip!, activity)
+  console.log('Activity added')
+};
 
 async function viewByDayCLI() {
   if (!currentTrip) {
