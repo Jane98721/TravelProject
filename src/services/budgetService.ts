@@ -1,7 +1,6 @@
 //Importing types Trip, Activity from the models
 import { type Trip, type Activity} from '../models';
 
-
 //Function receive the object trip and return the number with the cost of the trip.
 // Function to calculate the total cost of a trip by summing up the cost of all activities.
 //Export is used the function to be used in other files. 

@@ -6,17 +6,27 @@ export const engine = new ItineraryEngine()
 
 export const getDestinationInfo = async (countryName: string) => {
   try {
-    const response = await fetch 
-    (`https://restcountries.com/v3.1/name/${countryName}`)
+    const response = await fetch (
+      `https://restcountries.com/v3.1/name/${countryName}`
+    )
+
     if(!response.ok) throw new Error ('Country not found')
 
-    const data: any = await response.json()
+    const data = (await response.json()) as {currencies?: Record <string, {name: string; symbol:string}>; flag?:string}[]
+    const country = data [0]
+
+    const currency = country.currencies?
+    Object.keys(country.currencies)[0] : 'USD'
+
+    const flag = country.flag
+
     return {
-      currency: Object.keys(data[0].currencies)[0] ?? 'USD',
-      flag: data[0].flag ?? undefined
+      currency,
+      flag
     }
+
   } catch (error){
-    throw new Error ('Could not fetch country data')
+    console.log('Could not fetch country data')
   }
 }
 
@@ -27,8 +37,8 @@ export const createTrip = async (destination:string): Promise<Trip> => {
     destination,
     startDate: new Date().toLocaleDateString(),
     activities: [],
-    currency: countryInfo.currency,
-    flag: countryInfo.flag
+    currency: countryInfo?.currency,
+    flag: countryInfo?.flag
   }
     engine.addTrip(newTrip)
     return newTrip 

@@ -1,5 +1,5 @@
 import * as readline from "readline";
-import type { Activity, Trip } from './models';
+import type { Activity, Trip, } from './models';
 import {createTrip} from './services/destinationService'
 import {engine} from './services/destinationService'
 import {v4 as uuidv4} from 'uuid'
@@ -12,10 +12,10 @@ let currentTrip: Trip | null = null;
 function ask(question: string): Promise<string> {
   process.stdout.write(`${question} `);
   return new Promise(resolve => rl.once('line', line => resolve(line)));
-}
+};
 
 async function mainMenu() {
-  console.log('\nTrip Planner Menu ===');
+  console.log('\n 🌍 Trip Planner Menu ===');
   console.log('1. Create trip');
   console.log('2. Add Activity');
   console.log('3. View Activities by Day');
@@ -25,10 +25,10 @@ async function mainMenu() {
   console.log('7. Show High Cost Activities');
   console.log('8. Show All Trips');
   console.log('9. Exit');
-
+  
   while (true) {
     const choice = (await ask('\nChoose an option:')).trim();
-
+    
     switch (choice) {
       case '1':
         await createTripCLI();
@@ -81,6 +81,7 @@ async function createTripCLI(){
   currentTrip = await createTrip(destination.trim())
   console.log('✅ Trip created successfully');
 }
+
 async function addActivityCLI() {
   if (!currentTrip) {
     console.log('No trip found. Let\'s create one now.');
@@ -95,11 +96,12 @@ async function addActivityCLI() {
     return;
   }
 
-  const category = (await ask('Category (food/transport/sightseeing):')).trim() as Activity['category'];
+  const category = (await ask('Category (food/transport/sightseeing):'))
+  .trim() as Activity['category'];
   const time = await ask('Time (HH:MM):');
   const date = await ask('Date (YYYY-MM-DD):');
 
-  const startTime = new Date (`${date.trim()}T${time.trim()}`)
+  const startTime = new Date (`${date.trim()}T${time.trim()}`);
   
   const activity: Activity = {
     id: uuidv4(), 
@@ -107,7 +109,7 @@ async function addActivityCLI() {
     cost, 
     category, 
     startTime,
-  } 
+  };
   engine.addActivity(currentTrip!, activity)
   console.log('✅ Activity added')
 };
