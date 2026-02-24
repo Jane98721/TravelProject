@@ -12,5 +12,5 @@ export type Trip = {
   startDate: string;
   activities: Activity[];
   currency: string,
-  flag: string 
+  flag?: string 
 }
