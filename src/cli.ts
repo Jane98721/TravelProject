@@ -55,7 +55,7 @@ async function mainMenu() {
         console.log("Trips", JSON.stringify(engine.getTrips(), null, 2))
         break;
       case '9':
-        console.log('Goodbye!');
+        console.log('👋 Goodbye!');
         rl.close();
         return;
       default:
@@ -63,7 +63,7 @@ async function mainMenu() {
     }
 
     // re-print menu after each action
-    console.log('\nTrip Planner Menu ===');
+    console.log('\n 🌍 Trip Planner Menu ===');
     console.log('1. Create trip');
     console.log('2. Add Activity');
     console.log('3. View Activities by Day');
@@ -79,7 +79,7 @@ async function mainMenu() {
 async function createTripCLI(){
   const destination = await ask("Destination: ")
   currentTrip = await createTrip(destination.trim())
-  console.log('Trip created succesfully')
+  console.log('✅ Trip created successfully');
 }
 async function addActivityCLI() {
   if (!currentTrip) {
@@ -91,7 +91,7 @@ async function addActivityCLI() {
   const costStr = await ask('Cost:');
   const cost = Number(costStr);
   if (isNaN(cost)) {
-    console.log('Invalid cost.');
+    console.log('❌ Invalid cost.');
     return;
   }
 
@@ -109,7 +109,7 @@ async function addActivityCLI() {
     startTime,
   } 
   engine.addActivity(currentTrip!, activity)
-  console.log('Activity added')
+  console.log('✅ Activity added')
 };
 
 async function viewByDayCLI() {
@@ -151,7 +151,7 @@ async function calculateCLI(){
   }
 
   const total = calculateTotalCost(currentTrip)
-  console.log(`\n Total Trip Cost: $${total}`)
+  console.log(`\n 💰 Total Trip Cost: $${total}`)
 }
 
 async function highCostActivitiesCLI(){
@@ -173,7 +173,7 @@ async function highCostActivitiesCLI(){
   highCostActivities.forEach(a =>
   console.log(`- ${a.name} ($${a.cost})`)
   );
-  console.log(`Total: ${highCostActivities.length}`);
+  console.log(`💰 Total: ${highCostActivities.length}`);
   }
 
 mainMenu().catch(err => {
