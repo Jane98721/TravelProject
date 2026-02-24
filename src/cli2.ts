@@ -139,4 +139,8 @@ const handleAction = async (choice: string): Promise<void> => {
 // ================= START APP =================
 
 console.log('Welcome to the Travel Planner CLI!');
+<<<<<<< HEAD
 showMenu();
+=======
+showMenu();
+>>>>>>> origin/main

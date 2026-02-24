@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+//BUDGET SERVICE
+
+>>>>>>> origin/main
 //Importing types Trip, Activity from the models
 import { type Trip, type Activity} from '../models';
 
