@@ -33,78 +33,114 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.selectTrip = selectTrip;
+// Cli Budget
 const readline = __importStar(require("readline"));
 const models_1 = require("./models");
 const budgetService_1 = require("./services/budgetService");
-// ================= READLINE =================
+const uuid_1 = require("uuid");
+// Creating readline interface for user input and output in the console.
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
 const ask = (question) => new Promise(resolve => rl.question(question, resolve));
-// ================= MENU =================
-const showMenu = async () => {
-    console.log('\n💰 Budget Menu');
-    console.log('1. Add Activity');
-    console.log('2. View Total Trip Cost');
-    console.log('3. Show High Cost Activities');
-    console.log('4. Exit');
-    const choice = await ask('\nChoose an option: ');
-    await handleAction(choice);
-};
+// Creating helper function to select a trip, which is used in multiple actions. 
+// It checks if there are any trips available and returns the first one, 
+// or throws an error if no trips exist.
+function selectTrip() {
+    const trip = models_1.trips[0];
+    if (!trip) {
+        throw new Error('No trips available. Create a trip first.');
+    }
+    return trip;
+}
+// Creating main menu function to display options to the user and handle their choice.
+async function showMenu() {
+    console.log('\n🌍 Travel Planner CLI');
+    console.log('1. Create Trip');
+    console.log('2. Add Activity');
+    console.log('3. View Total Trip Cost');
+    console.log('4. Show High Cost Activities');
+    console.log('5. Exit \n');
+    const choice = await ask('Choose an option: ');
+    await handleAction(choice.trim());
+}
 // ================= ACTIONS =================
 const handleAction = async (choice) => {
-    if (!models_1.trips.length) {
-        // create a default trip automatically
-        models_1.trips.push({
-            id: '1',
-            destination: 'My Trip',
-            startDate: new Date(),
-            activities: [],
-            currency: '',
-            flag: ''
-        });
-    }
-    const trip = models_1.trips[0];
-    switch (choice.trim()) {
-        // Adding activity to the trip, with default values for category and start time, as per instructions.
+    switch (choice) {
         case '1': {
-            const name = await ask('Activity name: ');
-            const cost = Number(await ask('Cost: '));
-            if (isNaN(cost)) {
-                console.log('❌ Invalid cost');
-                break;
-            }
-            trip.activities.push({
-                id: crypto.randomUUID(),
-                name,
-                cost,
-                category: 'sightseeing', // default value
-                startTime: new Date() // default value
-            });
-            console.log('✅ Activity added!');
+            console.clear();
+            const destination = await ask('Trip Destination: ');
+            const trip = {
+                id: (0, uuid_1.v4)(),
+                destination: destination.trim(),
+                startDate: new Date(), // Date is not a string
+                activities: [],
+                currency: '',
+                flag: ''
+            };
+            models_1.trips.push(trip);
+            console.log('✅ Trip created!');
             break;
         }
         case '2': {
-            const total = (0, budgetService_1.calculateTotalCost)(trip);
-            console.log(`\n✅ Total Cost: ${total}`);
+            try {
+                const trip = selectTrip();
+                const name = await ask('Activity Name: ');
+                const costStr = await ask('Activity Cost: ');
+                const cost = Number(costStr);
+                if (!name.trim() || isNaN(cost)) {
+                    console.log('❌ Invalid name or cost');
+                    break;
+                }
+                const activity = {
+                    id: (0, uuid_1.v4)(),
+                    name: name.trim(),
+                    cost,
+                    category: 'sightseeing', // default
+                    startTime: new Date()
+                };
+                trip.activities.push(activity);
+                console.log('✅ Activity added!');
+            }
+            catch (error) {
+                console.log(`⚠️ ${error.message}`);
+            }
             break;
         }
         case '3': {
-            const value = await ask('Enter cost threshold: ');
-            const threshold = Number(value);
-            if (isNaN(threshold)) {
-                console.log('❌ Invalid number');
-                break;
+            try {
+                const trip = selectTrip();
+                const total = (0, budgetService_1.calculateTotalCost)(trip);
+                console.log(`\n💰 Total Trip Cost: $${total}`);
             }
-            const activities = (0, budgetService_1.getHighCostActivities)(trip, threshold);
-            console.log(`\n🔥 Activities above ${threshold}:`);
-            activities.forEach(a => console.log(`- ${a.name} ($${a.cost})`));
-            console.log(`Total: ${activities.length}`);
+            catch (error) {
+                console.log(`⚠️ ${error.message}`);
+            }
             break;
         }
-        case '4':
-            console.log('\nGoodbye 👋');
+        case '4': {
+            try {
+                const trip = selectTrip();
+                const thresholdStr = await ask('Enter cost threshold: ');
+                const threshold = Number(thresholdStr);
+                if (isNaN(threshold)) {
+                    console.log('❌ Invalid number');
+                    break;
+                }
+                const highCostActivities = (0, budgetService_1.getHighCostActivities)(trip, threshold);
+                console.log(`\n🔥 Activities above $${threshold}:`);
+                highCostActivities.forEach(a => console.log(`- ${a.name} ($${a.cost})`));
+                console.log(`Total: ${highCostActivities.length}`);
+            }
+            catch (error) {
+                console.log(`⚠️ ${error.message}`);
+            }
+            break;
+        }
+        case '5':
+            console.log('👋 Goodbye!');
             rl.close();
             process.exit(0);
         default:
@@ -112,6 +148,6 @@ const handleAction = async (choice) => {
     }
     await showMenu();
 };
-// ================= START =================
-console.log('🌍 Travel Planner Budget CLI');
+// ================= START APP =================
+console.log('Welcome to the Travel Planner CLI!');
 showMenu();

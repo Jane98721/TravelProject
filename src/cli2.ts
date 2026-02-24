@@ -1,13 +1,12 @@
 
+// Cli Budget
 import * as readline from 'readline';
-import { trips } from './models';
-import {
-  calculateTotalCost,
-  getHighCostActivities
-} from './services/budgetService';
+import { trips as importedTrips, type Trip, type Activity } from './models';
+import { calculateTotalCost, getHighCostActivities } from './services/budgetService';
+import { v4 as uuidv4 } from 'uuid';
+import { clear } from 'console';
 
-// ================= READLINE =================
-
+// Creating readline interface for user input and output in the console.
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
@@ -16,89 +15,117 @@ const rl = readline.createInterface({
 const ask = (question: string): Promise<string> =>
   new Promise(resolve => rl.question(question, resolve));
 
-// ================= MENU =================
+// Creating helper function to select a trip, which is used in multiple actions. 
+// It checks if there are any trips available and returns the first one, 
+// or throws an error if no trips exist.
 
-const showMenu = async (): Promise<void> => {
-  console.log('\n💰 Budget Menu');
-  console.log('1. Add Activity');
-  console.log('2. View Total Trip Cost');
-  console.log('3. Show High Cost Activities');
-  console.log('4. Exit');
+export function selectTrip(): Trip {
+  const trip = importedTrips[0];
+  if (!trip) {
+    throw new Error('No trips available. Create a trip first.');
+  }
+  return trip;
+}
 
-  const choice = await ask('\nChoose an option: ');
-  await handleAction(choice);
-};
+// Creating main menu function to display options to the user and handle their choice.
+
+async function showMenu(): Promise<void> {
+  console.log('\n🌍 Travel Planner CLI');
+  console.log('1. Create Trip');
+  console.log('2. Add Activity');
+  console.log('3. View Total Trip Cost');
+  console.log('4. Show High Cost Activities');
+  console.log('5. Exit \n');
+
+  const choice = await ask('Choose an option: ');
+  await handleAction(choice.trim());
+}
 
 // ================= ACTIONS =================
 
 const handleAction = async (choice: string): Promise<void> => {
+  switch (choice) {
 
-  if (!trips.length) {
-    // create a default trip automatically
-    trips.push({
-        id: '1',
-        destination: 'My Trip',
-        startDate: new Date(),
+    case '1': {
+      console.clear();
+      const destination = await ask('Trip Destination: ');
+      const trip: Trip = {
+        id: uuidv4(),
+        destination: destination.trim(),
+        startDate: new Date(), // Date is not a string
         activities: [],
         currency: '',
         flag: ''
-    });
-  }
-
-  const trip = trips[0];
-
-  switch (choice.trim()) {
-
-    // Adding activity to the trip, with default values for category and start time, as per instructions.
-    case '1': {
-      const name = await ask('Activity name: ');
-      const cost = Number(await ask('Cost: '));
-
-      if (isNaN(cost)) {
-        console.log('❌ Invalid cost');
-        break;
-      }
-
-      trip.activities.push({
-        id: crypto.randomUUID(),
-        name,
-        cost,
-        category: 'sightseeing', // default value
-        startTime: new Date()     // default value
-      });
-      
-      console.log('✅ Activity added!');
+      };
+      importedTrips.push(trip);
+      console.log('✅ Trip created!');
       break;
     }
 
     case '2': {
-      const total = calculateTotalCost(trip);
-      console.log(`\n✅ Total Cost: ${total}`);
+      try {
+        const trip = selectTrip();
+        const name = await ask('Activity Name: ');
+        const costStr = await ask('Activity Cost: ');
+        const cost = Number(costStr);
+
+        if (!name.trim() || isNaN(cost)) {
+          console.log('❌ Invalid name or cost');
+          break;
+        }
+
+        const activity: Activity = {
+          id: uuidv4(),
+          name: name.trim(),
+          cost,
+          category: 'sightseeing', // default
+          startTime: new Date()
+        };
+
+        trip.activities.push(activity);
+        console.log('✅ Activity added!');
+      } catch (error: any) {
+        console.log(`⚠️ ${error.message}`);
+      }
       break;
     }
 
     case '3': {
-      const value = await ask('Enter cost threshold: ');
-      const threshold = Number(value);
-
-      if (isNaN(threshold)) {
-        console.log('❌ Invalid number');
-        break;
+      try {
+        const trip = selectTrip();
+        const total = calculateTotalCost(trip);
+        console.log(`\n💰 Total Trip Cost: $${total}`);
+      } catch (error: any) {
+        console.log(`⚠️ ${error.message}`);
       }
-
-      const activities = getHighCostActivities(trip, threshold);
-
-      console.log(`\n🔥 Activities above ${threshold}:`);
-      activities.forEach(a =>
-        console.log(`- ${a.name} ($${a.cost})`)
-      );
-
-      console.log(`Total: ${activities.length}`);
       break;
     }
 
-    case '4':
-      console.log('\nGoodbye 👋');
+    case '4': {
+      try {
+        const trip = selectTrip();
+        const thresholdStr = await ask('Enter cost threshold: ');
+        const threshold = Number(thresholdStr);
+
+        if (isNaN(threshold)) {
+          console.log('❌ Invalid number');
+          break;
+        }
+
+        const highCostActivities = getHighCostActivities(trip, threshold);
+        console.log(`\n🔥 Activities above $${threshold}:`);
+        highCostActivities.forEach(a =>
+          console.log(`- ${a.name} ($${a.cost})`)
+        );
+        console.log(`Total: ${highCostActivities.length}`);
+      } catch (error: any) {
+        console.log(`⚠️ ${error.message}`);
+      }
+      break;
+    }
+
+    case '5':
+      console.log('👋 Goodbye!');
       rl.close();
       process.exit(0);
 
@@ -109,7 +136,7 @@ const handleAction = async (choice: string): Promise<void> => {
   await showMenu();
 };
 
-// ================= START =================
+// ================= START APP =================
 
-console.log('🌍 Travel Planner Budget CLI');
+console.log('Welcome to the Travel Planner CLI!');
 showMenu();
