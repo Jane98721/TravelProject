@@ -3,6 +3,8 @@ import type { Activity, Trip } from './models';
 import {createTrip} from './services/destinationService'
 import {engine} from './services/destinationService'
 import {v4 as uuidv4} from 'uuid'
+import { calculateTotalCost, getHighCostActivities } from './services/budgetService';
+
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 let currentTrip: Trip | null = null;
@@ -19,8 +21,10 @@ async function mainMenu() {
   console.log('3. View Activities by Day');
   console.log('4. View Sorted Activities');
   console.log('5. Filter Activities by Category');
-  console.log('6. Show All Trips');
-  console.log('7. Exit');
+  console.log('6. View Total Trip Cost');
+  console.log('7. Show High Cost Activities');
+  console.log('8. Show All Trips');
+  console.log('9. Exit');
 
   while (true) {
     const choice = (await ask('\nChoose an option:')).trim();
@@ -42,14 +46,20 @@ async function mainMenu() {
         await filterByCategoryCLI();
         break;
       case '6':
-        console.log("Trips", JSON.stringify(engine.getTrips(), null, 2))
+        await calculateCLI();
         break;
       case '7':
+        await highCostActivitiesCLI();
+        break;
+      case '8':
+        console.log("Trips", JSON.stringify(engine.getTrips(), null, 2))
+        break;
+      case '9':
         console.log('Goodbye!');
         rl.close();
         return;
       default:
-        console.log('Invalid choice. Enter a number 1–7.');
+        console.log('Invalid choice. Enter a number 1–9.');
     }
 
     // re-print menu after each action
@@ -58,9 +68,11 @@ async function mainMenu() {
     console.log('2. Add Activity');
     console.log('3. View Activities by Day');
     console.log('4. View Sorted Activities');
-    console.log('5. Filter Activities by Category');    
-    console.log('6. All trips');
-    console.log('7. Exit');
+    console.log('5. Filter Activities by Category');
+    console.log('6. View Total Trip Cost');
+    console.log('7. Show High Cost Activities');     
+    console.log('8. All trips');
+    console.log('9. Exit');
   }
 }
 
@@ -82,6 +94,7 @@ async function addActivityCLI() {
     console.log('Invalid cost.');
     return;
   }
+
   const category = (await ask('Category (food/transport/sightseeing):')).trim() as Activity['category'];
   const time = await ask('Time (HH:MM):');
   const date = await ask('Date (YYYY-MM-DD):');
@@ -130,6 +143,38 @@ async function filterByCategoryCLI() {
   const filtered = engine.filterActivitiesByCategory(currentTrip, category);
   console.log('Filtered Activities:', filtered);
 }
+
+async function calculateCLI(){
+  if(!currentTrip){
+    console.log('Create a trip first')
+    return
+  }
+
+  const total = calculateTotalCost(currentTrip)
+  console.log(`\n Total Trip Cost: $${total}`)
+}
+
+async function highCostActivitiesCLI(){
+  if(!currentTrip){
+    console.log('Create a trip first')
+    return;
+  }
+
+  const thresholdStr = await ask('Enter cost threshold: ');
+  const threshold = Number(thresholdStr);
+
+  if (isNaN(threshold)) {
+  console.log('❌ Invalid number');
+  return
+  } 
+
+  const highCostActivities = getHighCostActivities(currentTrip, threshold);
+  console.log(`\n🔥 Activities above $${threshold}:`);
+  highCostActivities.forEach(a =>
+  console.log(`- ${a.name} ($${a.cost})`)
+  );
+  console.log(`Total: ${highCostActivities.length}`);
+  }
 
 mainMenu().catch(err => {
   console.error(err);
