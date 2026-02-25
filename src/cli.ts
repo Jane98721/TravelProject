@@ -76,14 +76,14 @@ async function mainMenu() {
   }
 }
 
-async function createTripCLI(){
+const createTripCLI = async () => {
   const destination = await ask("Destination: ")
   const date = await ask("Date (YYYY-MM-DD): ")
   currentTrip = await createTrip(destination.trim(), date.trim())
   console.log('✅ Trip created successfully');
 }
 
-async function addActivityCLI() {
+const addActivityCLI = async () => {
   if (!currentTrip) {
     console.log('No trip found. Let\'s create one now.');
     createTripCLI()
@@ -116,7 +116,7 @@ async function addActivityCLI() {
   console.log('✅ Activity added')
 };
 
-async function viewByDayCLI() {
+const viewByDayCLI = async () => {
   if (!currentTrip) {
     console.log('Create a trip first.');
     return;
@@ -127,7 +127,7 @@ async function viewByDayCLI() {
   console.log('Activities:', activities);
 }
 
-async function viewSortedCLI() {
+const viewSortedCLI = async() => {
   if (!currentTrip) {
     console.log('Create a trip first.');
     return;
@@ -137,7 +137,7 @@ async function viewSortedCLI() {
   console.log('Sorted Activities:', sorted);
 }
 
-async function filterByCategoryCLI() {
+const filterByCategoryCLI = async() => {
   if (!currentTrip) {
     console.log('Create a trip first.');
     return;
@@ -149,7 +149,7 @@ async function filterByCategoryCLI() {
   console.log('Filtered Activities:', filtered);
 }
 
-async function calculateCLI(){
+const calculateCLI = () =>{
   if(!currentTrip){
     console.log('Create a trip first')
     return
@@ -159,7 +159,7 @@ async function calculateCLI(){
   console.log(`\n 💰 Total Trip Cost: $${total}`)
 }
 
-async function highCostActivitiesCLI(){
+const highCostActivitiesCLI = async () => {
   if(!currentTrip){
     console.log('Create a trip first')
     return;
