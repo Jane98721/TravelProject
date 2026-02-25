@@ -4,6 +4,7 @@ import { ItineraryEngine } from './itineraryService'
 
 export const engine = new ItineraryEngine()
 
+//Get info from the API
 export const getDestinationInfo = async (countryName: string) => {
   try {
     const response = await fetch (
@@ -12,7 +13,8 @@ export const getDestinationInfo = async (countryName: string) => {
 
     if(!response.ok) throw new Error ('Country not found')
 
-    const data = (await response.json()) as {currencies?: Record <string, {name: string; symbol:string}>; flag?:string}[]
+    const data = (await response.json()) as 
+    {currencies?: Record <string, {name: string; symbol:string}>; flag:string}[]
     const country = data [0]
 
     const currency = country.currencies?
@@ -30,16 +32,17 @@ export const getDestinationInfo = async (countryName: string) => {
   }
 }
 
-export const createTrip = async (destination:string): Promise<Trip> => {
+//Create a trip
+export const createTrip = async (destination:string, date:string): Promise<Trip> => {
   const countryInfo = await getDestinationInfo(destination)
   const newTrip: Trip = {
     id: uuidv4(),
     destination,
-    startDate: new Date().toLocaleDateString(),
+    startDate: date,
     activities: [],
     currency: countryInfo?.currency,
     flag: countryInfo?.flag
-  }
+    }
     engine.addTrip(newTrip)
     return newTrip 
 }

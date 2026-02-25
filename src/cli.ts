@@ -78,7 +78,8 @@ async function mainMenu() {
 
 async function createTripCLI(){
   const destination = await ask("Destination: ")
-  currentTrip = await createTrip(destination.trim())
+  const date = await ask("Date (YYYY-MM-DD): ")
+  currentTrip = await createTrip(destination.trim(), date.trim())
   console.log('✅ Trip created successfully');
 }
 
@@ -108,8 +109,9 @@ async function addActivityCLI() {
     name: name.trim(), 
     cost, 
     category, 
-    startTime,
+    startTime
   };
+
   engine.addActivity(currentTrip!, activity)
   console.log('✅ Activity added')
 };
@@ -141,7 +143,8 @@ async function filterByCategoryCLI() {
     return;
   }
 
-  const category = (await ask('Category (food/transport/sightseeing):')).trim() as Activity['category'];
+  const category = 
+  (await ask('Category (food/transport/sightseeing):')).trim() as Activity['category'];
   const filtered = engine.filterActivitiesByCategory(currentTrip, category);
   console.log('Filtered Activities:', filtered);
 }
