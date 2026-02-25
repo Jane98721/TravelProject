@@ -26,7 +26,8 @@ export const getDestinationInfo = async (countryName: string) => {
       currency,
       flag
     }
-
+  
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error){
     console.log('Could not fetch country data')
   }

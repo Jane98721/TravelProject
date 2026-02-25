@@ -1,4 +1,5 @@
-//Importing types Trip, Activity from the models
+//Budget Service
+// //Importing types Trip, Activity from the models
 import { type Trip, type Activity} from '../models';
 
 //Function receive the object trip and return the number with the cost of the trip.
@@ -24,9 +25,7 @@ export const getHighCostActivities = (
   );
 };
 
-//console.log('Budget service loaded \n');
-//console.log(`Total Cost is: ${calculateTotalCost(trips[0])}\n`);
-//console.log('High cost activities: ' + getHighCostActivities(trips[0], 100).length + '\n');
+
 
 
 

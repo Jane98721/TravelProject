@@ -102,7 +102,7 @@ const addActivityCLI = async () => {
   const time = await ask('Time (HH:MM):');
   const date = await ask('Date (YYYY-MM-DD):');
 
-  const startTime = new Date (`${date.trim()}T${time.trim()}`);
+  const startTime = new Date (`${date.trim()} ${time.trim()}`);
   
   const activity: Activity = {
     id: uuidv4(), 
